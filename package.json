@@ -1,7 +1,7 @@
 {
   "name": "@luke-e-gibson/drawjs",
   "private": false,
-  "version": "1.2.3",
+  "version": "1.2.4",
   "type": "module",
   "module": "./dist/drawjs.js",
   "scripts": {
