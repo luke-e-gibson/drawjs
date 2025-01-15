@@ -56,7 +56,10 @@ export default class DrawHtml {
     this.canvas.addEventListener('mousemove', this.mouseMove.bind(this));
     this.canvas.addEventListener('mouseup', this.mouseUp.bind(this));
     this.canvas.addEventListener('mouseleave', this.mouseUp.bind(this));
+    this.canvas.addEventListener("resize", this.resize.bind(this));
 
+
+    this.resize();
   }
 
   public updatePenConfig(config: PenConfig) {
@@ -180,7 +183,8 @@ export default class DrawHtml {
   }
 
   private resize() {
-    console.log('resize');
-    void this.redraw()    
+    this.canvas?.getBoundingClientRect();
+    this.canvas?.setAttribute('width', `${this.canvas?.clientWidth}`);
+    this.canvas?.setAttribute('height', `${this.canvas?.clientHeight}`);    
   }
 }
