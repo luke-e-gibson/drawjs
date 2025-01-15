@@ -1,58 +1,45 @@
-export class Point {
-  readonly x: number;
-  readonly y: number;
+import { PenConfig, Point, Stroke } from "./helpers";
+import { DrawJsPointFunctions } from "./pointFunctions";
 
-  constructor(x: number, y: number) {
-    this.x = x;
-    this.y = y;
-  
-  }
-}
 
-export interface PenConfig {
-  color: string;
-  width: number;
-}
-
-export class Stroke {
-  readonly points: Point[] = [];
-  readonly config: PenConfig = {
-    color: 'black',
-    width: 1
-  }
-
-  constructor(points: Point[], color: PenConfig = {color: 'black', width: 1}) {
-    this.points = points;
-    this.config = color;
-  }
+interface DrawJsConfig {
+  pen: PenConfig;
+  pointsPipeline: Array<(points: Point[]) => Point[]>;
+  debugPoints: boolean;
 }
 
 
 export default class DrawHtml {
+  private config: DrawJsConfig = {
+    debugPoints: false,
+    pen: { color: 'black', width: 5 },
+    pointsPipeline: [
+        DrawJsPointFunctions.distributePoints,
+        DrawJsPointFunctions.smoothPoints,
+    ]
+  }
   private canvas: HTMLCanvasElement | null = null;
   private ctx: CanvasRenderingContext2D | null = null;
 
-  private penConfig: PenConfig = {
-    color: 'black',
-    width: 1
+  private penConfig: PenConfig = { color: 'black', width: 5 };
+  public get PenConfig() : PenConfig { return this.penConfig; }
+
+  private debugPoints: boolean = false;
+  public toggleDebugPoints() {
+    this.debugPoints = !this.debugPoints;
+    void this.redraw();
   }
- 
-  public get PenConfig() : PenConfig {
-    return this.penConfig;
-  }
-  
-  
+
   private mousePosition: Point = new Point(0, 0);
   private isMouseDown: boolean = false
 
   private points: Point[] = [];
   private strokes: Stroke[] = [];
 
-  public constructor() {console.log('con');}
+  public constructor() {}
 
-  public attatch(canvas: HTMLCanvasElement) {
-    console.log('attatch'); 
-
+  public attach(canvas: HTMLCanvasElement) {
+    this.penConfig = this.config.pen;
 
     this.canvas = canvas
     if(!this.canvas) { throw new Error('Canvas not found'); }
@@ -60,16 +47,17 @@ export default class DrawHtml {
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
     if(!this.ctx) { throw new Error('Canvas not found'); }
 
-
     this.canvas.addEventListener('resize', this.resize.bind(this));
     this.canvas.addEventListener('mousedown', this.mouseDown.bind(this));
     this.canvas.addEventListener('mousemove', this.mouseMove.bind(this));
     this.canvas.addEventListener('mouseup', this.mouseUp.bind(this));
     this.canvas.addEventListener('mouseleave', this.mouseUp.bind(this));
+
   }
 
-  public updatePenconfig(config: PenConfig) {
+  public updatePenConfig(config: PenConfig) {
     this.penConfig = config;
+    console.log(this.penConfig);
   }
 
   public export(type: "image" | "json") {
@@ -87,13 +75,13 @@ export default class DrawHtml {
     });
     void this.redraw();
   }
-
+  
   private redraw() {
     if(!this.ctx) { return; }
     if(!this.canvas) { return; }
-
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
     this.strokes.forEach(stroke => {
         if(!this.ctx) { return; }
         this.ctx.strokeStyle = stroke.config.color;
@@ -127,35 +115,60 @@ export default class DrawHtml {
     })
     this.ctx.stroke();
 
-    this.ctx.fillStyle = 'blue';
-    this.drawRect(this.mousePosition.x, this.mousePosition.y, 10, 10);
-    this.ctx.fillStyle = 'black';
-
     if(this.isMouseDown) {
       this.points.push(this.mousePosition);
     }
 
+    if(this.debugPoints){
+      this.strokes.forEach(stroke => {
+        stroke.points.forEach((point, index) => {
+          if(index === 0) {
+            this.drawRect(point.x, point.y, 5, 5);
+          } else {
+            this.drawRect(point.x, point.y, 3, 3);
+          }
+        })
+      })
+     }
+  
+     if(this.debugPoints){
+      this.points.forEach((point, index) => {
+        if(index === 0) {
+          this.drawRect(point.x, point.y, 5, 5);
+        } else {
+          this.drawRect(point.x, point.y, 3, 3);
+        }
+      })
+     }
+
   }
 
-  private drawRect(x: number, y: number, width: number, height: number) {
-    if(!this.ctx) { return; }
-    this.ctx.fillRect(x - ( width / 2 ),  y - ( height / 2 ), width, height);
-  }
+   private drawRect(x: number, y: number, width: number, height: number) {
+     if(!this.ctx) { return; }
+     this.ctx.fillStyle = 'blue';
+     this.ctx.fillRect(x - ( width / 2 ),  y - ( height / 2 ), width, height);
+   }
 
   private mouseMove(e: MouseEvent) {
     this.mousePosition = new Point(e.offsetX, e.offsetY);
-    void this.redraw()
+    if(this.isMouseDown) {
+      void this.redraw()
+    }
   }
 
   private mouseDown() {
     this.isMouseDown = true;
     void this.redraw()
-
   }
 
   private mouseUp() {
-    
-    this.strokes.push(new Stroke(this.points, this.penConfig));
+    let points = this.points;
+
+    this.config.pointsPipeline.forEach((fn) => {
+      points = fn(points);
+    })
+
+    this.strokes.push(new Stroke(points, this.penConfig));
     this.points = [];
 
     this.isMouseDown = false;

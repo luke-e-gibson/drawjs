@@ -1,26 +1,24 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import DrawHtml from "./lib";
 
-export function useDrawCanvas() {
-  const draw = useRef<DrawHtml | null>(null);
+const draw = new DrawHtml();
 
-  if (!draw.current) {
-    draw.current = new DrawHtml();
-  }
+export function useDrawjs() {
+  
 
-  return draw.current;
+  return draw;
 }
 
 
-export function DrawCanvas(props: React.CanvasHTMLAttributes<HTMLCanvasElement>) {
+export function Canvas(props: React.CanvasHTMLAttributes<HTMLCanvasElement>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const draw = useDrawCanvas();
+  const draw = useDrawjs();
 
   console.log('canvas', canvasRef.current);
 
   useEffect(() => {
     if (canvasRef.current) {
-      draw.attatch(canvasRef.current);
+      draw.attach(canvasRef.current);
     }
   }, [canvasRef, draw])
 
@@ -29,4 +27,39 @@ export function DrawCanvas(props: React.CanvasHTMLAttributes<HTMLCanvasElement>)
         <canvas ref={canvasRef} {...props} />
     </div>
   );
+}
+
+export function PenColorChanger(props: React.HTMLAttributes<HTMLInputElement>) {
+  const draw = useDrawjs();
+  const [color, setColor] = useState(draw.PenConfig.color);
+
+  useEffect(() => {
+    draw.updatePenConfig({width: draw.PenConfig.width, color: color});
+  }, [color, draw])
+
+  return (
+    <input type="color" onChange={(e)=> {setColor(e.target.value)}} {...props}/>
+  );
+
+}
+
+export function PenWidthChanger(props: React.HTMLAttributes<HTMLInputElement>) {
+  const draw = useDrawjs();
+  const [width, setWidth] = useState(draw.PenConfig.width);
+
+  useEffect(() => {
+    draw.updatePenConfig({width: width, color: draw.PenConfig.color});
+  }, [width, draw])
+
+  return (
+    <input type="number" value={width} onChange={(e)=> {setWidth(Number(e.target.value))}} {...props}/>
+  );
+}
+
+export function CanvasDebugButton() {
+  const draw = useDrawjs();
+
+  return (
+    <button onClick={() => {draw.toggleDebugPoints()}}>Debug</button>
+  )
 }
