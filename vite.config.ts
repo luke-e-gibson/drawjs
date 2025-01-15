@@ -5,12 +5,12 @@ import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react(), dts({include: ["lib"]})],
+  plugins: [react(), dts({tsconfigPath: './tsconfig.json', rollupTypes: true})],
   build: {
     copyPublicDir: false,
     lib: {
       entry: [resolve(__dirname, 'lib/lib.ts'), resolve(__dirname, 'lib/react.tsx')],
-      formats: ['es']
+      formats: ['es'],
     },
     rollupOptions: {
       external: ['react', 'react-dom'],
