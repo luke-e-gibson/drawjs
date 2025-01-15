@@ -43,7 +43,11 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/drawjs.js"
-    }
+      "default": "./dist/drawjs.js",
+      "pointFunctions": {
+        "types": "./dist/pointFunctions.d.ts",
+        "default": "./dist/pointFunctions.js"
+      }
+    },
   }
 }

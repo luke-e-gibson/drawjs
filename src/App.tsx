@@ -1,6 +1,8 @@
-import {Canvas, CanvasDebugButton, PenColorChanger, PenWidthChanger} from '../lib/react'
+import {Canvas, CanvasDebugButton, PenColorChanger, PenWidthChanger, useDrawjs} from '../lib/react'
 
 function App() {
+
+  useDrawjs()
 
   return (
     <>
