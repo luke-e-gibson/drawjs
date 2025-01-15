@@ -1,14 +1,15 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 import dts from 'vite-plugin-dts'
+import { resolve } from 'path'
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), dts({include: ["lib"]})],
-  copyPublicDir: false,
   build: {
+    copyPublicDir: false,
     lib: {
-      entry: 'src/main.ts',
+      entry: [resolve(__dirname, 'lib/lib.ts'), resolve(__dirname, 'lib/react.tsx')],
       formats: ['es']
     },
     rollupOptions: {

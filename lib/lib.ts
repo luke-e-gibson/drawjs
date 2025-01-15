@@ -29,8 +29,8 @@ export class Stroke {
 
 
 export default class DrawHtml {
-  private canvas: HTMLCanvasElement;
-  private ctx: CanvasRenderingContext2D;
+  private canvas: HTMLCanvasElement | null = null;
+  private ctx: CanvasRenderingContext2D | null = null;
 
   private penConfig: PenConfig = {
     color: 'black',
@@ -48,8 +48,13 @@ export default class DrawHtml {
   private points: Point[] = [];
   private strokes: Stroke[] = [];
 
-  constructor() {
-    this.canvas = document.getElementById('draw-canvas') as HTMLCanvasElement;
+  public constructor() {console.log('con');}
+
+  public attatch(canvas: HTMLCanvasElement) {
+    console.log('attatch'); 
+
+
+    this.canvas = canvas
     if(!this.canvas) { throw new Error('Canvas not found'); }
 
     this.ctx = this.canvas.getContext('2d') as CanvasRenderingContext2D;
@@ -68,17 +73,23 @@ export default class DrawHtml {
   }
 
   private redraw() {
+    if(!this.ctx) { return; }
+    if(!this.canvas) { return; }
+
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
     
     this.strokes.forEach(stroke => {
+        if(!this.ctx) { return; }
         this.ctx.strokeStyle = stroke.config.color;
         this.ctx.lineWidth = stroke.config.width;
 
         this.ctx.beginPath();
         stroke.points.forEach((point, index) => {
           if(index === 0) {
+            if(!this.ctx) { return; }
             this.ctx.moveTo(point.x, point.y);
           } else {
+            if(!this.ctx) { return; }
             this.ctx.lineTo(point.x, point.y);
           }
         })
@@ -91,8 +102,10 @@ export default class DrawHtml {
     this.ctx.beginPath();
     this.points.forEach((point, index) => {
       if(index === 0) {
+        if(!this.ctx) { return; }
         this.ctx.moveTo(point.x, point.y);
       } else {
+        if(!this.ctx) { return; }
         this.ctx.lineTo(point.x, point.y);
       }
     })
@@ -109,6 +122,7 @@ export default class DrawHtml {
   }
 
   private drawRect(x: number, y: number, width: number, height: number) {
+    if(!this.ctx) { return; }
     this.ctx.fillRect(x - ( width / 2 ),  y - ( height / 2 ), width, height);
   }
 
