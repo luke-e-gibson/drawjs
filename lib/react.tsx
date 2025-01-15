@@ -4,11 +4,8 @@ import DrawHtml from "./lib";
 const draw = new DrawHtml();
 
 export function useDrawjs() {
-  
-
   return draw;
 }
-
 
 export function Canvas(props: React.CanvasHTMLAttributes<HTMLCanvasElement>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);

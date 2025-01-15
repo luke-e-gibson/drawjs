@@ -24,28 +24,6 @@ export const DrawJsPointFunctions = {
   
       return smoothed;
     },
-    normalizePoints(points: Point[]): Point[] {
-      if (points.length < 2) return points;
-  
-      const centerX = points.reduce((sum, p) => sum + p.x, 0) / points.length;
-      const centerY = points.reduce((sum, p) => sum + p.y, 0) / points.length;
-  
-      const centered = points.map(p => new Point(p.x - centerX, p.y - centerY));
-  
-      const firstPoint = centered[0];
-      const lastPoint = centered[centered.length - 1];
-      const angle = Math.atan2(lastPoint.y - firstPoint.y, lastPoint.x - firstPoint.x);
-  
-      const rotated = centered.map(p => new Point(
-        p.x * Math.cos(-angle) - p.y * Math.sin(-angle),
-        p.x * Math.sin(-angle) + p.y * Math.cos(-angle)
-      ));
-  
-      const maxX = Math.max(...rotated.map(p => Math.abs(p.x)));
-      const scale = maxX !== 0 ? 1 / maxX : 1;
-  
-      return rotated.map(p => new Point(p.x * scale, p.y * scale));
-    },
     distributePoints(points: Point[]): Point[] {
       const numberOfPoints = points.length / 2;
       if (points.length < 2) return points;
