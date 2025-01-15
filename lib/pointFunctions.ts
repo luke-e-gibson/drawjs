@@ -25,7 +25,7 @@ export const DrawJsPointFunctions = {
       return smoothed;
     },
     distributePoints(points: Point[]): Point[] {
-      const numberOfPoints = points.length / 2;
+      const numberOfPoints = points.length;
       if (points.length < 2) return points;
   
       const totalDistance = points.reduce((acc, point, i) => {

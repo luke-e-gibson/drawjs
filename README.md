@@ -1,7 +1,7 @@
 # Drawjs
 React component to help you add drawing to your react project
 
-#### Demo: 
+#### Demo: [Drawjs Demo](https://drawjs.lukegibson.dev)
 
 #### Features
  - Mouse/ track pad drawing
