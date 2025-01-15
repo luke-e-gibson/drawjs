@@ -42,7 +42,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/lib.js"
+      "import": "./dist/lib.js"
     }
   }
 }
