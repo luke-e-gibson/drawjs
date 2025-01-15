@@ -38,6 +38,10 @@ export default class DrawHtml {
 
   public constructor() {}
 
+  public setConfig(config: Partial<DrawJsConfig>) {
+    this.config = {...this.config, ...config};
+  }
+
   public attach(canvas: HTMLCanvasElement) {
     this.penConfig = this.config.pen;
 
@@ -75,7 +79,7 @@ export default class DrawHtml {
     });
     void this.redraw();
   }
-  
+
   private redraw() {
     if(!this.ctx) { return; }
     if(!this.canvas) { return; }
