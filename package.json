@@ -3,6 +3,7 @@
   "private": false,
   "version": "1.1.6",
   "type": "module",
+  "module": "./dist/drawjs.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b ./tsconfig.lib.json && vite build",
@@ -42,7 +43,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "default": "./dist/main.js"
+      "default": "./dist/drawjs.js"
     }
   }
 }
