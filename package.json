@@ -10,6 +10,10 @@
     "preview": "vite preview",
     "prepublishOnly": "pnpm run build"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/luke-e-gibson/drawjs"
+  },
   "files": [
     "dist"
   ],

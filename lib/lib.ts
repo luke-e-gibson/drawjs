@@ -72,6 +72,22 @@ export default class DrawHtml {
     this.penConfig = config;
   }
 
+  public export(type: "image" | "json") {
+    if(type === 'image') {
+      return this.canvas?.toDataURL('image/png');
+    } else {
+      return JSON.stringify(this.strokes);
+    }
+  }
+
+  public import(data: string) {
+    const strokes = JSON.parse(data);
+    this.strokes = strokes.map((stroke: Stroke) => {
+      return new Stroke(stroke.points.map((point: Point) => new Point(point.x, point.y)), stroke.config);
+    });
+    void this.redraw();
+  }
+
   private redraw() {
     if(!this.ctx) { return; }
     if(!this.canvas) { return; }
