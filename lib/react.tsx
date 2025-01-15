@@ -53,10 +53,10 @@ export function PenWidthChanger(props: React.HTMLAttributes<HTMLInputElement>) {
   );
 }
 
-export function CanvasDebugButton() {
+export function CanvasDebugButton(props: React.HTMLAttributes<HTMLButtonElement>) {
   const draw = useDrawjs();
 
   return (
-    <button onClick={() => {draw.toggleDebugPoints()}}>Debug</button>
+    <button onClick={() => {draw.toggleDebugPoints()}} {...props}>Debug</button>
   )
 }
