@@ -9,7 +9,8 @@ export default defineConfig({
   build: {
     copyPublicDir: false,
     lib: {
-      entry: [resolve(__dirname, 'lib/lib.ts')],
+      entry: [resolve(__dirname, 'lib/react.tsx')],
+      fileName: 'drawjs',
       formats: ['es'],
     },
     rollupOptions: {
