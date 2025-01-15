@@ -2,7 +2,6 @@
   "extends": "./tsconfig.app.json",
   "include": ["lib"],
   "compilerOptions": {
-    "baseUrl": ".",
     "noEmit": true,
   }
 }
