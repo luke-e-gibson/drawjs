@@ -7,44 +7,29 @@ interface DrawJsConfig {
   debugPoints: boolean;
 }
 
+const defaultConfig: DrawJsConfig = {
+  debugPoints: false,
+  pen: { color: "black", width: 5 },
+  pointsPipeline: [
+    DrawJsPointFunctions.simplifyPoints,
+    DrawJsPointFunctions.distributePoints,
+    DrawJsPointFunctions.smoothPoints,
+  ],
+};
+const defaultPenConfig: PenConfig = { color: "black", width: 5 };
+
 export default class DrawHtml {
-  private config: DrawJsConfig = {
-    debugPoints: false,
-    pen: { color: "black", width: 5 },
-    pointsPipeline: [
-      DrawJsPointFunctions.simplifyPoints,
-      DrawJsPointFunctions.distributePoints,
-      DrawJsPointFunctions.smoothPoints,
-      //DrawJsPointFunctions.distributePoints,
-      //DrawJsPointFunctions.simplifyPoints,
-    ],
-  };
+  private config: DrawJsConfig = defaultConfig;
   private canvas: HTMLCanvasElement | null = null;
   private ctx: CanvasRenderingContext2D | null = null;
-
-  private penConfig: PenConfig = { color: "black", width: 5 };
-  public get PenConfig(): PenConfig {
-    return this.penConfig;
-  }
-
+  private penConfig: PenConfig = defaultPenConfig;
   private debugPoints: boolean = false;
-  public toggleDebugPoints() {
-    this.debugPoints = !this.debugPoints;
-    void this.redraw();
-  }
-
-  private mousePosition: Point = new Point(0, 0);
-  private isTouch: boolean = false;
-  private isMouseDown: boolean = false;
-
+  private pointerPosition: Point = new Point(0, 0);
+  private isPointerDown: boolean = false;
   private points: Point[] = [];
   private strokes: Stroke[] = [];
 
   public constructor() {}
-
-  public setConfig(config: Partial<DrawJsConfig>) {
-    this.config = { ...this.config, ...config };
-  }
 
   public attach(canvas: HTMLCanvasElement) {
     this.penConfig = this.config.pen;
@@ -60,24 +45,54 @@ export default class DrawHtml {
     }
 
     this.canvas.addEventListener("resize", this.resize.bind(this));
-    
-    this.canvas.addEventListener("mousedown", this.mouseDown.bind(this));
-    this.canvas.addEventListener("mousemove", this.mouseMove.bind(this));
-    this.canvas.addEventListener("mouseup", this.mouseUp.bind(this));
-    this.canvas.addEventListener("mouseleave", this.mouseUp.bind(this));
 
-    this.canvas.addEventListener("touchstart", this.touchStart.bind(this));
-    this.canvas.addEventListener("touchmove", this.touchMove.bind(this));
-    this.canvas.addEventListener("touchcancel", this.touchStop.bind(this));
-    this.canvas.addEventListener("touchend", this.touchStop.bind(this));
+    this.canvas.addEventListener("pointerdown", this.pointerDown.bind(this));
+    this.canvas.addEventListener("pointermove", this.pointerMove.bind(this));
+    this.canvas.addEventListener("pointerup", this.pointerUp.bind(this));
+    this.canvas.addEventListener("pointerleave", this.pointerLeave.bind(this));
 
-    this.canvas.addEventListener("pointerdown", this.mouseDown.bind(this));
-    this.canvas.addEventListener("pointermove", (e) => console.log(e.pointerType));
-    this.canvas.addEventListener("pointerup", this.mouseUp.bind(this));
-    this.canvas.addEventListener("pointerleave", this.mouseUp.bind(this));
-
+    document.body.addEventListener(
+      "touchstart",
+      function (e) {
+        if (e.target == canvas) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+    document.body.addEventListener(
+      "touchend",
+      function (e) {
+        if (e.target == canvas) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
+    document.body.addEventListener(
+      "touchmove",
+      function (e) {
+        if (e.target == canvas) {
+          e.preventDefault();
+        }
+      },
+      { passive: false }
+    );
 
     this.resize();
+  }
+
+  public get PenConfig(): PenConfig {
+    return this.penConfig;
+  }
+
+  public toggleDebugPoints() {
+    this.debugPoints = !this.debugPoints;
+    void this.redraw();
+  }
+
+  public setConfig(config: Partial<DrawJsConfig>) {
+    this.config = { ...this.config, ...config };
   }
 
   public updatePenConfig(config: PenConfig) {
@@ -103,175 +118,107 @@ export default class DrawHtml {
     void this.redraw();
   }
 
-  private redraw() {
-    if (!this.ctx) {
-      return;
-    }
-    if (!this.canvas) {
-      return;
-    }
+  private pointsDrawStroke(points: Point[], penConfig: PenConfig) {
+    if (!this.ctx) return;
 
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.ctx.strokeStyle = penConfig.color;
+    this.ctx.lineWidth = penConfig.width;
 
-    this.strokes.forEach((stroke) => {
-      if (!this.ctx) {
-        return;
-      }
-      this.ctx.strokeStyle = stroke.config.color;
-      this.ctx.lineWidth = stroke.config.width;
-
-      this.ctx.beginPath();
-      stroke.points.forEach((point, index) => {
-        if (index === 0) {
-          if (!this.ctx) {
-            return;
-          }
-          this.ctx.moveTo(point.x, point.y);
-        } else {
-          if (!this.ctx) {
-            return;
-          }
-          this.ctx.lineTo(point.x, point.y);
-        }
-      });
-      this.ctx.stroke();
-    });
-
-    this.ctx.strokeStyle = this.penConfig.color;
-    this.ctx.lineWidth = this.penConfig.width;
     this.ctx.beginPath();
-    this.points.forEach((point, index) => {
+    points.forEach((point, index) => {
       if (index === 0) {
-        if (!this.ctx) {
-          return;
-        }
+        if (!this.ctx) return;
         this.ctx.moveTo(point.x, point.y);
       } else {
-        if (!this.ctx) {
-          return;
-        }
+        if (!this.ctx) return;
         this.ctx.lineTo(point.x, point.y);
       }
     });
     this.ctx.stroke();
+  }
 
-    if (this.isMouseDown) {
-      this.points.push(this.mousePosition);
+  private pointsDrawSquare(points: Point[]) {
+    if (!this.ctx) return;
+    this.ctx.fillStyle = "blue";
+
+    points.forEach((point) => {
+      if (!this.ctx) return;
+      this.ctx.fillRect(point.x, point.y, 3, 3);
+    });
+  }
+
+  private redraw() {
+    if (!this.ctx) return;
+    if (!this.canvas) return;
+    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+    this.strokes.forEach((stroke) => {
+      this.pointsDrawStroke(stroke.points, stroke.config);
+    });
+
+    this.pointsDrawStroke(this.points, this.penConfig);
+
+    if (this.isPointerDown) {
+      this.points.push(this.pointerPosition);
     }
-    
+
     if (this.debugPoints) {
       this.strokes.forEach((stroke) => {
-        stroke.points.forEach((point, index) => {
-          if (index === 0) {
-            this.drawRect(point.x, point.y, 5, 5);
-          } else {
-            this.drawRect(point.x, point.y, 3, 3);
-          }
-        });
+        this.pointsDrawSquare(stroke.points);
       });
-    }
-    
-    if (this.debugPoints) {
-      this.points.forEach((point, index) => {
-        if (index === 0) {
-          this.drawRect(point.x, point.y, 5, 5);
-        } else {
-          this.drawRect(point.x, point.y, 3, 3);
-        }
-      });
+      this.pointsDrawSquare(this.points);
     }
     this.points = DrawJsPointFunctions.simplifyPoints(this.points);
-  }
-
-  private touchMove(e: TouchEvent) {
-    if(!this.isTouch) {return}
-    if(!this.canvas) {return;}
-    const boundingRect = this.canvas.getBoundingClientRect();
-
-    const relX = e.touches[0].clientX - boundingRect.left;
-    const relY = e.touches[0].clientY - boundingRect.top;
-
-    const x = Math.round((relX / boundingRect.width) * this.canvas.width);
-    const y = Math.round((relY / boundingRect.height) * this.canvas.height);
-
-    e.preventDefault();
-    this.mousePosition = new Point(x, y);
-    if (this.isMouseDown) {
-      void this.redraw();
-    }
-  }
-
-  private touchStop() {
-    if(!this.isTouch) {return}
-    let points = this.points;
-
-    this.config.pointsPipeline.forEach((fn) => {
-      points = fn(points);
-    });
-
-    this.strokes.push(new Stroke(points, this.penConfig));
-    this.points = [];
-
-    this.isMouseDown = false;
-    void this.redraw();
-  }
-
-  private touchStart(e: TouchEvent) {
-    e.preventDefault()
-    if(!this.isTouch) {return}
-    if(!this.canvas) {return;}
-    const boundingRect = this.canvas.getBoundingClientRect();
-
-    const relX = e.touches[0].clientX - boundingRect.left;
-    const relY = e.touches[0].clientY - boundingRect.top;
-
-    const x = Math.round((relX / boundingRect.width) * this.canvas.width);
-    const y = Math.round((relY / boundingRect.height) * this.canvas.height);
-
-    e.preventDefault();
-    this.mousePosition = new Point(x, y);
-    this.isMouseDown = true;
-    void this.redraw();
-  }
-
-  private drawRect(x: number, y: number, width: number, height: number) {
-    if (!this.ctx) {
-      return;
-    }
-    this.ctx.fillStyle = "blue";
-    this.ctx.fillRect(x - width / 2, y - height / 2, width, height);
-  }
-
-  private mouseMove(e: MouseEvent) {
-    this.mousePosition = new Point(e.offsetX, e.offsetY);
-
-    if (this.isMouseDown) {
-      void this.redraw();
-    }
-  }
-
-  private mouseDown() {
-    this.isMouseDown = true;
-    void this.redraw();
-  }
-
-  private mouseUp() {
-    let points = this.points;
-
-    this.config.pointsPipeline.forEach((fn) => {
-      points = fn(points);
-    });
-
-    this.strokes.push(new Stroke(points, this.penConfig));
-    this.points = [];
-
-    this.isMouseDown = false;
-    void this.redraw();
   }
 
   private resize() {
     this.canvas?.getBoundingClientRect();
     this.canvas?.setAttribute("width", `${this.canvas?.clientWidth}`);
     this.canvas?.setAttribute("height", `${this.canvas?.clientHeight}`);
+  }
+
+
+  private pointerDown(e: PointerEvent) {
+    e.preventDefault();
+    void this.updatePointerPosition(e);
+    this.isPointerDown = true;
+  }
+
+  private pointerMove(e: PointerEvent) {
+    e.preventDefault();
+    void this.updatePointerPosition(e);
+  }
+
+  private pointerUp(e: PointerEvent) {
+    e.preventDefault();
+    if (this.isPointerDown) {
+      this.strokes.push(new Stroke(this.points, this.penConfig));
+      this.points = [];
+    }
+
+    this.isPointerDown = false;
+    void this.updatePointerPosition(e);
+  }
+
+  private pointerLeave(e: PointerEvent) {
+    void this.updatePointerPosition(e);
+  }
+
+  private updatePointerPosition(e: PointerEvent) {
+    switch (e.pointerType) {
+      case "mouse":
+        this.pointerPosition = new Point(e.offsetX, e.offsetY);
+        break;
+      case "pen":
+        this.pointerPosition = new Point(e.offsetX, e.offsetY);
+        break;
+      case "touch":
+        this.pointerPosition = new Point(e.offsetX, e.offsetY);
+        break;
+      default:
+        throw new Error("Unknown pointer type");
+    }
+
+    this.redraw();
   }
 }
