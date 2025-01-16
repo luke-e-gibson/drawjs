@@ -11,8 +11,6 @@ export function Canvas(props: React.CanvasHTMLAttributes<HTMLCanvasElement>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const draw = useDrawjs();
 
-  console.log("canvas", canvasRef.current);
-
   useEffect(() => {
     if (canvasRef.current) {
       draw.attach(canvasRef.current);
