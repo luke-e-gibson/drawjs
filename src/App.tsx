@@ -1,4 +1,4 @@
-import {Canvas, CanvasDebugButton, PenColorChanger, PenWidthChanger, useDrawjs} from '../lib/react'
+import {Canvas, CanvasDebugButton, PenColorChanger, PenWidthChanger, TogglePenModeButton, useDrawjs} from '../lib/react'
 
 function App() {
 
@@ -10,6 +10,7 @@ function App() {
         <PenColorChanger/>
         <PenWidthChanger/>
         <CanvasDebugButton/>
+        <TogglePenModeButton/>
         <Canvas width={800} height={800} style={{border: "black 1px solid"}}/>
       </div>
     </>

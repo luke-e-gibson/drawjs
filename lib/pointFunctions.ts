@@ -63,7 +63,7 @@ export const DrawJsPointFunctions = {
       result.push(points[points.length - 1]);
       return result;
     },
-    simplifyPoints(points: Point[], tolerance: number = 5): Point[] {
+    simplifyPoints(points: Point[], tolerance: number = 1): Point[] {
       if (points.length < 3) return points;
       
       const result: Point[] = [points[0]];

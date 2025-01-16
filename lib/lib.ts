@@ -28,8 +28,17 @@ export default class DrawHtml {
   private isPointerDown: boolean = false;
   private points: Point[] = [];
   private strokes: Stroke[] = [];
+  private isPenMode: boolean = false;
 
   public constructor() {}
+
+  public setPenMode(mode: boolean) {
+    this.isPenMode = mode;
+  }
+
+  public get penMode() {
+    return this.isPenMode;
+  }
 
   public attach(canvas: HTMLCanvasElement) {
     this.penConfig = this.config.pen;
@@ -125,18 +134,23 @@ export default class DrawHtml {
     this.ctx.lineWidth = penConfig.width;
 
     this.ctx.beginPath();
+
     points.forEach((point, index) => {
       if (index === 0) {
         if (!this.ctx) return;
         this.ctx.moveTo(point.x, point.y);
       } else {
         if (!this.ctx) return;
-        this.ctx.moveTo(points[index-1].x, points[index-1].y);
+        //this.ctx.moveTo(point.x, point.y);
 
-        const vector = new Point( point.x - points[index - 1].x, point.y - points[index - 1].y );
-        const vectorInverted = new Point(-vector.x, -vector.y);
+        if(index === points.length - 1) {
+          this.ctx.lineTo(point.x, point.y);
+        } else {
+          const xc = (point.x + points[index + 1].x) / 2;
+          const yc = (point.y + points[index + 1].y) / 2;
         
-        this.ctx.bezierCurveTo(point.x - vector.x / 2, point.y - vector.y / 2, point.x - vectorInverted.x / 2, point.y - vectorInverted.y / 2, point.x, point.y);
+          this.ctx.quadraticCurveTo(point.x, point.y, xc, yc);
+        }
       }
     });
     this.ctx.stroke();
@@ -171,6 +185,7 @@ export default class DrawHtml {
       this.strokes.forEach((stroke) => {
         this.pointsDrawSquare(stroke.points);
       });
+
       this.pointsDrawSquare(this.points);
     }
     this.points = DrawJsPointFunctions.simplifyPoints(this.points);
@@ -223,7 +238,7 @@ export default class DrawHtml {
         this.pointerPosition = new Point(e.offsetX, e.offsetY);
         break;
       case "touch":
-        this.pointerPosition = new Point(e.offsetX, e.offsetY);
+        if(!this.isPenMode) this.pointerPosition = new Point(e.offsetX, e.offsetY);
         break;
       default:
         throw new Error("Unknown pointer type");

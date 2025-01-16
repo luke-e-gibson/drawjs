@@ -75,3 +75,13 @@ export function CanvasDebugButton(
     </button>
   );
 }
+
+export function TogglePenModeButton(props: React.HTMLAttributes<HTMLButtonElement>) {
+  const draw = useDrawjs();
+
+  return (
+    <button {...props} onClick={() => draw.setPenMode(!draw.penMode)}>
+      Toggle Pen Mode
+    </button>
+  );
+}
