@@ -14,7 +14,6 @@ function App() {
         <PenColorChanger />
         <PenWidthChanger />
         <CanvasDebugButton />
-        { "Pen mode " + penMode}
         <Canvas
           width={800}
           height={800}
