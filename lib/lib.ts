@@ -131,7 +131,12 @@ export default class DrawHtml {
         this.ctx.moveTo(point.x, point.y);
       } else {
         if (!this.ctx) return;
-        this.ctx.lineTo(point.x, point.y);
+        this.ctx.moveTo(points[index-1].x, points[index-1].y);
+
+        const vector = new Point( point.x - points[index - 1].x, point.y - points[index - 1].y );
+        const vectorInverted = new Point(-vector.x, -vector.y);
+        
+        this.ctx.bezierCurveTo(point.x - vector.x / 2, point.y - vector.y / 2, point.x - vectorInverted.x / 2, point.y - vectorInverted.y / 2, point.x, point.y);
       }
     });
     this.ctx.stroke();
@@ -177,7 +182,6 @@ export default class DrawHtml {
     this.canvas?.setAttribute("height", `${this.canvas?.clientHeight}`);
   }
 
-
   private pointerDown(e: PointerEvent) {
     e.preventDefault();
     void this.updatePointerPosition(e);
@@ -192,6 +196,12 @@ export default class DrawHtml {
   private pointerUp(e: PointerEvent) {
     e.preventDefault();
     if (this.isPointerDown) {
+      let points = this.points;
+
+      this.config.pointsPipeline.forEach((pipeline) => {
+        points = pipeline(points);
+      });
+
       this.strokes.push(new Stroke(this.points, this.penConfig));
       this.points = [];
     }
@@ -218,7 +228,6 @@ export default class DrawHtml {
       default:
         throw new Error("Unknown pointer type");
     }
-
     this.redraw();
   }
 }
