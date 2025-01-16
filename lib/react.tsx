@@ -1,10 +1,24 @@
 import React, { useEffect, useRef, useState } from "react";
 import DrawHtml from "./lib";
 
-const draw = new DrawHtml();
+const DrawContext = React.createContext<DrawHtml | null>(null);
+
+export function DrawProvider({ children }: { children: React.ReactNode }) {
+  const [drawInstance] = useState(() => new DrawHtml());
+  
+  return (
+    <DrawContext.Provider value={drawInstance}>
+      {children}
+    </DrawContext.Provider>
+  );
+}
 
 export function useDrawjs() {
-  return draw;
+  const context = React.useContext(DrawContext);
+  if (!context) {
+    throw new Error('useDrawjs must be used within a DrawProvider');
+  }
+  return context;
 }
 
 export function Canvas(props: React.CanvasHTMLAttributes<HTMLCanvasElement>) {
@@ -72,16 +86,6 @@ export function CanvasDebugButton(
       {...props}
     >
       Debug
-    </button>
-  );
-}
-
-export function TogglePenModeButton(props: React.HTMLAttributes<HTMLButtonElement>) {
-  const draw = useDrawjs();
-
-  return (
-    <button {...props} onClick={() => draw.setPenMode(!draw.penMode)}>
-      Toggle Pen Mode
     </button>
   );
 }

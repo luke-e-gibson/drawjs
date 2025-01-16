@@ -28,11 +28,13 @@ export default class DrawHtml {
   private isPointerDown: boolean = false;
   private points: Point[] = [];
   private strokes: Stroke[] = [];
-  private isPenMode: boolean = false;
+  private isPenMode: boolean = true;
+
 
   public constructor() {}
 
   public setPenMode(mode: boolean) {
+    
     this.isPenMode = mode;
   }
 
