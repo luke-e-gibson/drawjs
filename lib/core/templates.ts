@@ -1,5 +1,3 @@
-import { DrawJsPointFunctions } from "./pointFunctions";
-
 export interface PenConfig {
   color: string;
   width: number;
@@ -16,13 +14,10 @@ export class Point {
   }
 }
 
-
 export interface DrawJsConfig {
   pen: PenConfig;
-  pointsPipeline: Array<(points: Point[]) => Point[]>;
   debugPoints: boolean;
 }
-
 
 export class Stroke {
   readonly points: Point[] = [];
@@ -37,14 +32,8 @@ export class Stroke {
   }
 }
 
-
 export const defaultConfig: DrawJsConfig = {
   debugPoints: false,
   pen: { color: "black", width: 5 },
-  pointsPipeline: [
-    DrawJsPointFunctions.simplifyPoints,
-    DrawJsPointFunctions.distributePoints,
-    DrawJsPointFunctions.smoothPoints,
-  ],
 };
 export const defaultPenConfig: PenConfig = { color: "black", width: 5 };

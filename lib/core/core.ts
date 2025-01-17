@@ -6,7 +6,7 @@ import {
   Point,
   Stroke,
 } from "./templates";
-import { DrawJsPointFunctions } from "./pointFunctions";
+import { simplifyPoints } from "./pointFunctions";
 import Canvas from "./canvas";
 
 export default class DrawHtml {
@@ -18,7 +18,7 @@ export default class DrawHtml {
 
   private _pointerPosition: Point = new Point(0, 0);
   private _isPointerDown: boolean = false;
-  
+
   private _usingStyles: boolean = true;
 
   private _debugMode: boolean = false;
@@ -27,7 +27,6 @@ export default class DrawHtml {
   private _strokes: Stroke[] = [];
 
   public constructor() {}
-
 
   public attach(canvas: HTMLCanvasElement, backCanvas: HTMLCanvasElement) {
     this._penConfig = this._config.pen;
@@ -42,7 +41,7 @@ export default class DrawHtml {
     return this._penConfig;
   }
 
-  public setPenConfig(config: PenConfig) { 
+  public setPenConfig(config: PenConfig) {
     this._penConfig = config;
   }
 
@@ -107,13 +106,19 @@ export default class DrawHtml {
 
       this._frontCanvas?.drawPoints(this._points, "red");
     }
-    this._points = DrawJsPointFunctions.simplifyPoints(this._points);
+    this._points = simplifyPoints(this._points);
   }
 
   private _registerEvents(canvas: HTMLCanvasElement) {
     if (!this._frontCanvas) return;
-    this._frontCanvas.registerEvent("pointerdown", this._pointerDown.bind(this));
-    this._frontCanvas.registerEvent("pointermove", this._pointerMove.bind(this));
+    this._frontCanvas.registerEvent(
+      "pointerdown",
+      this._pointerDown.bind(this)
+    );
+    this._frontCanvas.registerEvent(
+      "pointermove",
+      this._pointerMove.bind(this)
+    );
     this._frontCanvas.registerEvent("pointerup", this._pointerUp.bind(this));
     this._frontCanvas.registerEvent(
       "pointerleave",

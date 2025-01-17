@@ -15,7 +15,6 @@ export default class Canvas {
     void this._resize();
   }
   
-  
   public drawStroke(points: Point[], penConfig: PenConfig) {
     this.ctx.strokeStyle = penConfig.color;
     this.ctx.lineWidth = penConfig.width;
