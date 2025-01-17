@@ -1,4 +1,4 @@
-import { PenConfig, Point } from "./templates";
+import { PenConfig, Point, Stroke } from "./templates";
 
 export default class Canvas {
   private _canvas: HTMLCanvasElement;
@@ -11,7 +11,8 @@ export default class Canvas {
     this._ctx = canvas.getContext("2d") as CanvasRenderingContext2D;
     if(!this._ctx) throw new Error("2D context could not be created");
 
-    void this.registerEventListeners();
+    void this._registerEventListeners();
+    void this._resize();
   }
   
   
@@ -41,6 +42,17 @@ export default class Canvas {
     this.ctx.stroke();
   }
 
+  public drawStrokes(strokes: Stroke[]) {
+    strokes.forEach((stroke) => {
+      this.drawStroke(stroke.points, stroke.config);
+    });
+
+  }
+
+  public clear() {
+    this._ctx.clearRect(0, 0, this._canvas.width, this._canvas.height);
+  }
+
   public drawPoints(points: Point[], color: string) {
     this.ctx.fillStyle = color;
 
@@ -61,13 +73,12 @@ export default class Canvas {
     this._canvas.addEventListener(type, listener, options);
   }
 
-  private registerEventListeners() {
+  private _registerEventListeners() {
     this._canvas.addEventListener("resize", this._resize.bind(this));
   }
 
   private _resize() {
-    const { width, height } = this._canvas.getBoundingClientRect();
-    this._canvas.width = width;
-    this._canvas.height = height;
+    this._canvas.width = this.canvas.clientWidth;
+    this._canvas.height = this.canvas.clientHeight;
   }
 }

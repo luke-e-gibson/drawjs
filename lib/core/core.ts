@@ -4,7 +4,6 @@ import Canvas from "./canvas";
 
 export default class DrawHtml {
   private config: DrawJsConfig = defaultConfig;
-  private canvas: HTMLCanvasElement | null = null;
   private ctx: CanvasRenderingContext2D | null = null;
   private penConfig: PenConfig = defaultPenConfig;
   private debugPoints: boolean = false;
@@ -13,10 +12,10 @@ export default class DrawHtml {
   private points: Point[] = [];
   private strokes: Stroke[] = [];
   private isPenMode: boolean = true;
-
+  
+  private frontCanvas: Canvas | null = null;
   private backCanvas: Canvas | null = null;
-  //private backCanvas: HTMLCanvasElement | null = null;
-  private backCtx: CanvasRenderingContext2D | null = null;
+
 
   public constructor() {}
 
@@ -31,24 +30,15 @@ export default class DrawHtml {
   public attach(canvas: HTMLCanvasElement, backCanvas: HTMLCanvasElement) {
     this.penConfig = this.config.pen;
 
-    this.canvas = canvas;
-    if (!this.canvas) {
-      throw new Error("Canvas not found");
-    }
-
-    this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
-    if (!this.ctx) {
-      throw new Error("Canvas not found");
-    }
-
+    this.frontCanvas = new Canvas(canvas);
     this.backCanvas = new Canvas(backCanvas);
 
-    this.canvas.addEventListener("resize", this.resize.bind(this));
+    this.frontCanvas.registerEvent("pointerdown", this.pointerDown.bind(this));
+    this.frontCanvas.registerEvent("pointermove", this.pointerMove.bind(this));
+    this.frontCanvas.registerEvent("pointerup", this.pointerUp.bind(this));
+    this.frontCanvas.registerEvent("pointerleave", this.pointerLeave.bind(this));
+    this.frontCanvas.registerEvent("ratechange", (e) => {console.log(e)});
 
-    this.canvas.addEventListener("pointerdown", this.pointerDown.bind(this));
-    this.canvas.addEventListener("pointermove", this.pointerMove.bind(this));
-    this.canvas.addEventListener("pointerup", this.pointerUp.bind(this));
-    this.canvas.addEventListener("pointerleave", this.pointerLeave.bind(this));
 
     document.body.addEventListener(
       "touchstart",
@@ -77,8 +67,6 @@ export default class DrawHtml {
       },
       { passive: false }
     );
-
-    this.resize();
   }
 
   public get PenConfig(): PenConfig {
@@ -100,7 +88,7 @@ export default class DrawHtml {
 
   public export(type: "image" | "json") {
     if (type === "image") {
-      return this.canvas?.toDataURL("image/png");
+      return this.frontCanvas?.canvas.toDataURL("image/png");
     } else {
       return JSON.stringify(this.strokes);
     }
@@ -117,52 +105,11 @@ export default class DrawHtml {
     void this.redraw();
   }
 
-  private pointsDrawStroke(points: Point[], penConfig: PenConfig, ctx: CanvasRenderingContext2D) {
-    if (!ctx) return;
-
-    ctx.strokeStyle = penConfig.color;
-    ctx.lineWidth = penConfig.width;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    console.log(ctx.canvas.id)
-    points.forEach((point, index) => {
-      if (index === 0) {
-        if (!ctx) return;
-        ctx.moveTo(point.x, point.y);
-      } else {
-        if (!ctx) return;
-        //this.ctx.moveTo(point.x, point.y);
-
-        if(index === points.length - 1) {
-          ctx.lineTo(point.x, point.y);
-        } else {
-          const xc = (point.x + points[index + 1].x) / 2;
-          const yc = (point.y + points[index + 1].y) / 2;
-        
-          ctx.quadraticCurveTo(point.x, point.y, xc, yc);
-        }
-      }
-    });
-    ctx.stroke();
-  }
-
-  private pointsDrawSquare(points: Point[]) {
-    if (!this.ctx) return;
-    this.ctx.fillStyle = "blue";
-
-    points.forEach((point) => {
-      if (!this.ctx) return;
-      this.ctx.fillRect(point.x, point.y, 3, 3);
-    });
-  }
-
   private redraw() {
-    if (!this.ctx) return;
-    if (!this.backCtx) return;
-    if (!this.canvas) return;
-    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-    this.pointsDrawStroke(this.points, this.penConfig, this.ctx);
+    if (!this.frontCanvas) return;
+    this.frontCanvas.clear();
+    
+    this.frontCanvas.drawStroke(this.points, this.penConfig);
 
     if (this.isPointerDown) {
       this.points.push(this.pointerPosition);
@@ -170,18 +117,12 @@ export default class DrawHtml {
 
     if (this.debugPoints) {
       this.strokes.forEach((stroke) => {
-        this.pointsDrawSquare(stroke.points);
+        this.frontCanvas?.drawPoints(stroke.points, "red");
       });
 
-      this.pointsDrawSquare(this.points);
+      this.frontCanvas?.drawPoints(this.points, "red");
     }
     this.points = DrawJsPointFunctions.simplifyPoints(this.points);
-  }
-
-  private resize() {
-    this.canvas?.getBoundingClientRect();
-    this.canvas?.setAttribute("width", `${this.canvas?.clientWidth}`);
-    this.canvas?.setAttribute("height", `${this.canvas?.clientHeight}`);
   }
 
   private pointerDown(e: PointerEvent) {
@@ -201,12 +142,9 @@ export default class DrawHtml {
     if (this.isPointerDown) {
       this.strokes.push(new Stroke(this.points, this.penConfig));
       this.points = [];
-    
-      // this.backCtx?.clearRect(0, 0, this.backCanvas?.width as number, this.backCanvas?.height as number);
-      // this.strokes.forEach((stroke) => {
-      //   if (!this.backCtx) return console.error("No back context");
-      //   this.pointsDrawStroke(DrawJsPointFunctions.simplifyPoints(stroke.points), stroke.config, this.backCtx);
-      // });
+      
+      this.backCanvas?.clear();
+      this.backCanvas?.drawStrokes(this.strokes);
     }
 
     this.isPointerDown = false;
