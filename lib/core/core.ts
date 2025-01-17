@@ -1,5 +1,6 @@
 import { defaultConfig, defaultPenConfig, DrawJsConfig, PenConfig, Point, Stroke } from "./templates";
 import { DrawJsPointFunctions } from "./pointFunctions";
+import Canvas from "./canvas";
 
 export default class DrawHtml {
   private config: DrawJsConfig = defaultConfig;
@@ -13,8 +14,8 @@ export default class DrawHtml {
   private strokes: Stroke[] = [];
   private isPenMode: boolean = true;
 
-
-  private backCanvas: HTMLCanvasElement | null = null;
+  private backCanvas: Canvas | null = null;
+  //private backCanvas: HTMLCanvasElement | null = null;
   private backCtx: CanvasRenderingContext2D | null = null;
 
   public constructor() {}
@@ -40,15 +41,7 @@ export default class DrawHtml {
       throw new Error("Canvas not found");
     }
 
-    this.backCanvas = backCanvas;
-    if (!this.backCanvas) {
-      throw new Error("Canvas not found");
-    }
-
-    this.backCtx = this.backCanvas.getContext("2d") as CanvasRenderingContext2D;
-    if (!this.backCtx) {
-      throw new Error("Canvas not found");
-    }
+    this.backCanvas = new Canvas(backCanvas);
 
     this.canvas.addEventListener("resize", this.resize.bind(this));
 
@@ -189,10 +182,6 @@ export default class DrawHtml {
     this.canvas?.getBoundingClientRect();
     this.canvas?.setAttribute("width", `${this.canvas?.clientWidth}`);
     this.canvas?.setAttribute("height", `${this.canvas?.clientHeight}`);
-
-    this.backCanvas?.getBoundingClientRect();
-    this.backCanvas?.setAttribute("width", `${this.backCanvas?.clientWidth}`);
-    this.backCanvas?.setAttribute("height", `${this.backCanvas?.clientHeight}`);
   }
 
   private pointerDown(e: PointerEvent) {
@@ -213,11 +202,11 @@ export default class DrawHtml {
       this.strokes.push(new Stroke(this.points, this.penConfig));
       this.points = [];
     
-      this.backCtx?.clearRect(0, 0, this.backCanvas?.width as number, this.backCanvas?.height as number);
-      this.strokes.forEach((stroke) => {
-        if (!this.backCtx) return console.error("No back context");
-        this.pointsDrawStroke(DrawJsPointFunctions.simplifyPoints(stroke.points), stroke.config, this.backCtx);
-      });
+      // this.backCtx?.clearRect(0, 0, this.backCanvas?.width as number, this.backCanvas?.height as number);
+      // this.strokes.forEach((stroke) => {
+      //   if (!this.backCtx) return console.error("No back context");
+      //   this.pointsDrawStroke(DrawJsPointFunctions.simplifyPoints(stroke.points), stroke.config, this.backCtx);
+      // });
     }
 
     this.isPointerDown = false;
