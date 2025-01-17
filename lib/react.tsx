@@ -5,33 +5,39 @@ const DrawContext = React.createContext<DrawHtml | null>(null);
 
 export function DrawProvider({ children }: { children: React.ReactNode }) {
   const [drawInstance] = useState(() => new DrawHtml());
-  
+
   return (
-    <DrawContext.Provider value={drawInstance}>
-      {children}
-    </DrawContext.Provider>
+    <DrawContext.Provider value={drawInstance}>{children}</DrawContext.Provider>
   );
 }
 
 export function useDrawjs() {
   const context = React.useContext(DrawContext);
   if (!context) {
-    throw new Error('useDrawjs must be used within a DrawProvider');
+    throw new Error("useDrawjs must be used within a DrawProvider");
   }
   return context;
 }
 
 export function Canvas(props: React.CanvasHTMLAttributes<HTMLCanvasElement>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const backCanvas = useRef<HTMLCanvasElement>(null);
   const draw = useDrawjs();
 
   useEffect(() => {
-    if (canvasRef.current) {
-      draw.attach(canvasRef.current);
+    if (canvasRef.current && backCanvas.current) {
+      draw.attach(canvasRef.current, backCanvas.current);
     }
   }, [canvasRef, draw]);
 
-  return <canvas ref={canvasRef} {...props} />;
+  return (
+    <div>
+      <div style={{ position: "relative" }}>
+      <canvas ref={canvasRef} {...props} style={{position: "absolute", left: "0", top: "0", zIndex: "1", border: "black 1px solid"}} id="front"/>
+      <canvas ref={backCanvas} {...props} style={{position: "absolute", left: "0", top: "0", zIndex: "0", border: "black 1px solid"}} id="back"/>
+    </div>
+    </div>
+  );
 }
 
 export function PenColorChanger(props: React.HTMLAttributes<HTMLInputElement>) {
