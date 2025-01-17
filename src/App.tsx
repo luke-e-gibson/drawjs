@@ -1,23 +1,28 @@
-import { useEffect } from "react";
 import {
   Canvas,
   CanvasDebugButton,
   PenColorChanger,
   PenWidthChanger,
-} from "../lib/react";
+} from "../lib/react/react";
 
 function App() {
-
   return (
     <>
-      <div>
-        <PenColorChanger />
-        <PenWidthChanger />
-        <CanvasDebugButton />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <PenColorChanger />
+          <PenWidthChanger />
+          <CanvasDebugButton />
+          
+        </div>
         <Canvas
-          width={800}
-          height={800}
-          style={{ border: "black 1px solid" }}
+          style={{ border: "black 1px solid", width: "50%", height: "800px" }}
         />
       </div>
     </>

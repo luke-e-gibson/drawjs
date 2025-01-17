@@ -1,3 +1,8 @@
+export interface PenConfig {
+  color: string;
+  width: number;
+}
+
 export class Point {
   readonly x: number;
   readonly y: number;
@@ -9,9 +14,9 @@ export class Point {
   }
 }
 
-export interface PenConfig {
-  color: string;
-  width: number;
+export interface DrawJsConfig {
+  pen: PenConfig;
+  debugPoints: boolean;
 }
 
 export class Stroke {
@@ -26,3 +31,9 @@ export class Stroke {
     this.config = color;
   }
 }
+
+export const defaultConfig: DrawJsConfig = {
+  debugPoints: false,
+  pen: { color: "black", width: 5 },
+};
+export const defaultPenConfig: PenConfig = { color: "black", width: 5 };

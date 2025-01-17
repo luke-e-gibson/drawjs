@@ -10,7 +10,7 @@ export default defineConfig({
   build: {
     copyPublicDir: false,
     lib: {
-      entry: [resolve(__dirname, 'lib/react.tsx'), resolve(__dirname, 'lib/lib.ts')],
+      entry: [resolve(__dirname, 'lib/react.tsx'), resolve(__dirname, 'lib/core/core.ts'), resolve(__dirname, 'lib/vanilla/vanilla.ts')],
       formats: ['es'],
     },
     rollupOptions: {

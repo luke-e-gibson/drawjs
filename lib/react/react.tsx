@@ -1,6 +1,6 @@
-import styles from "./index.module.css";
+import styles from "../style/style.module.css";
 import React, { useEffect, useRef, useState } from "react";
-import DrawHtml from "./lib";
+import DrawHtml from "../core/core";
 
 const DrawContext = React.createContext<DrawHtml | null>(null);
 
@@ -41,10 +41,10 @@ export function Canvas(props: React.HTMLAttributes<HTMLDivElement>) {
 
 export function PenColorChanger(props: React.HTMLAttributes<HTMLInputElement>) {
   const draw = useDrawjs();
-  const [color, setColor] = useState(draw.PenConfig.color);
+  const [color, setColor] = useState(draw.penConfig.color);
 
   useEffect(() => {
-    draw.updatePenConfig({ width: draw.PenConfig.width, color: color });
+    draw.setPenConfig({ width: draw.penConfig.width, color: color });
   }, [color, draw]);
 
   return (
@@ -60,10 +60,10 @@ export function PenColorChanger(props: React.HTMLAttributes<HTMLInputElement>) {
 
 export function PenWidthChanger(props: React.HTMLAttributes<HTMLInputElement>) {
   const draw = useDrawjs();
-  const [width, setWidth] = useState(draw.PenConfig.width);
+  const [width, setWidth] = useState(draw.penConfig.width);
 
   useEffect(() => {
-    draw.updatePenConfig({ width: width, color: draw.PenConfig.color });
+    draw.setPenConfig({ width: width, color: draw.penConfig.color });
   }, [width, draw]);
 
   return (
@@ -86,7 +86,8 @@ export function CanvasDebugButton(
   return (
     <button
       onClick={() => {
-        draw.toggleDebugPoints();
+        console.log(draw.debugMode);
+        draw.setDebugMode(!draw.debugMode);
       }}
       {...props}
     >
