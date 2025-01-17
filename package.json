@@ -3,7 +3,6 @@
   "private": false,
   "version": "3.0.1",
   "type": "module",
-  "module": "./dist/drawjs.js",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b ./tsconfig.lib.json && vite build",
@@ -40,11 +39,11 @@
     "vite-plugin-dts": "^4.5.0"
   },
   "exports": {
-    "react": {
+    "./react": {
       "types": "./dist/rect.d.ts",
       "default": "./dist/react.js"
     },
-    "lib": {
+    "./lib": {
       "types": "./dist/lib.d.ts",
       "default": "./dist/lib.js"
     }
