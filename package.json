@@ -40,13 +40,13 @@
     "vite-plugin-dts": "^4.5.0"
   },
   "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/drawjs.js",
-      "pointFunctions": {
-        "types": "./dist/pointFunctions.d.ts",
-        "default": "./dist/pointFunctions.js"
-      }
+    "react": {
+      "types": "./dist/rect.d.ts",
+      "default": "./dist/react.js"
+    },
+    "lib": {
+      "types": "./dist/lib.d.ts",
+      "default": "./dist/lib.js"
     }
   }
 }
