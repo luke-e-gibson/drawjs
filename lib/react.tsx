@@ -1,4 +1,4 @@
-import "./index.css"
+import styles from "./index.module.css";
 import React, { useEffect, useRef, useState } from "react";
 import DrawHtml from "./lib";
 
@@ -32,9 +32,9 @@ export function Canvas(props: React.HTMLAttributes<HTMLDivElement>) {
   }, [canvasRef, draw]);
 
   return (
-    <div id="drawjs-container" {...props}>
-      <canvas  ref={canvasRef} id="drawjs-front"/>
-      <canvas ref={backCanvas} id="drawjs-back"/>
+    <div id={styles["drawjs-container"]} {...props}>
+      <canvas  ref={canvasRef} id={styles["drawjs-front"]}/>
+      <canvas ref={backCanvas} id={styles["drawjs-back"]}/>
     </div>
   );
 }
