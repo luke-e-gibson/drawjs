@@ -1,7 +1,7 @@
 {
-  "name": "@luke-e-gibson/drawjs",
+  "name": "finelinerjs",
   "private": false,
-  "version": "3.0.9",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
