@@ -37,7 +37,6 @@ export default class DrawHtml {
   public constructor() {}
 
   public setPenMode(mode: boolean) {
-    
     this.isPenMode = mode;
   }
 
@@ -207,6 +206,10 @@ export default class DrawHtml {
     this.canvas?.getBoundingClientRect();
     this.canvas?.setAttribute("width", `${this.canvas?.clientWidth}`);
     this.canvas?.setAttribute("height", `${this.canvas?.clientHeight}`);
+
+    this.backCanvas?.getBoundingClientRect();
+    this.backCanvas?.setAttribute("width", `${this.backCanvas?.clientWidth}`);
+    this.backCanvas?.setAttribute("height", `${this.backCanvas?.clientHeight}`);
   }
 
   private pointerDown(e: PointerEvent) {

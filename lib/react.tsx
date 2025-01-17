@@ -1,3 +1,4 @@
+import "./index.css"
 import React, { useEffect, useRef, useState } from "react";
 import DrawHtml from "./lib";
 
@@ -31,11 +32,9 @@ export function Canvas(props: React.HTMLAttributes<HTMLDivElement>) {
   }, [canvasRef, draw]);
 
   return (
-    <div {...props}>
-      <div style={{ position: "relative", width: "fit", height: "fit"}}>
-      <canvas  ref={canvasRef} style={{position: "absolute", left: "0", top: "0", zIndex: "1", border: "black 1px solid", width: "%100", height: "%100"}} id="front"/>
-      <canvas ref={backCanvas} style={{position: "absolute", left: "0", top: "0", zIndex: "0", border: "black 1px solid", width: "%100", height: "%100"}} id="back"/>
-    </div>
+    <div id="drawjs-container" {...props}>
+      <canvas  ref={canvasRef} id="drawjs-front"/>
+      <canvas ref={backCanvas} id="drawjs-back"/>
     </div>
   );
 }

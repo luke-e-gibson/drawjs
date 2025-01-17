@@ -1,0 +1,16 @@
+#drawjs-front {
+  width: 100%;
+  height: 100%;
+}
+
+#drawjs-back {
+  width: 100%;
+  height: 100%;
+}
+
+#drawjs-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+}
