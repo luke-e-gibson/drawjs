@@ -1,4 +1,4 @@
-import { Point } from "./helpers";
+import { Point } from "./templates";
 
 export const DrawJsPointFunctions = {
     smoothPoints(points: Point[], tension: number = 0.2): Point[] {

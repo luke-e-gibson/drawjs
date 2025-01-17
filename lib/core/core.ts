@@ -1,22 +1,5 @@
-import { PenConfig, Point, Stroke } from "./helpers";
+import { defaultConfig, defaultPenConfig, DrawJsConfig, PenConfig, Point, Stroke } from "./templates";
 import { DrawJsPointFunctions } from "./pointFunctions";
-
-interface DrawJsConfig {
-  pen: PenConfig;
-  pointsPipeline: Array<(points: Point[]) => Point[]>;
-  debugPoints: boolean;
-}
-
-const defaultConfig: DrawJsConfig = {
-  debugPoints: false,
-  pen: { color: "black", width: 5 },
-  pointsPipeline: [
-    DrawJsPointFunctions.simplifyPoints,
-    DrawJsPointFunctions.distributePoints,
-    DrawJsPointFunctions.smoothPoints,
-  ],
-};
-const defaultPenConfig: PenConfig = { color: "black", width: 5 };
 
 export default class DrawHtml {
   private config: DrawJsConfig = defaultConfig;
@@ -224,6 +207,7 @@ export default class DrawHtml {
   }
 
   private pointerUp(e: PointerEvent) {
+    if(e.pointerType === "touch" && !this.isPenMode) return;
     e.preventDefault();
     if (this.isPointerDown) {
       this.strokes.push(new Stroke(this.points, this.penConfig));
