@@ -1,44 +1,127 @@
-import { defaultConfig, defaultPenConfig, DrawJsConfig, PenConfig, Point, Stroke } from "./templates";
+import {
+  defaultConfig,
+  defaultPenConfig,
+  DrawJsConfig,
+  PenConfig,
+  Point,
+  Stroke,
+} from "./templates";
 import { DrawJsPointFunctions } from "./pointFunctions";
 import Canvas from "./canvas";
 
 export default class DrawHtml {
-  private config: DrawJsConfig = defaultConfig;
-  private ctx: CanvasRenderingContext2D | null = null;
-  private penConfig: PenConfig = defaultPenConfig;
-  private debugPoints: boolean = false;
-  private pointerPosition: Point = new Point(0, 0);
-  private isPointerDown: boolean = false;
-  private points: Point[] = [];
-  private strokes: Stroke[] = [];
-  private isPenMode: boolean = true;
-  
-  private frontCanvas: Canvas | null = null;
-  private backCanvas: Canvas | null = null;
+  private _config: DrawJsConfig = defaultConfig;
+  private _penConfig: PenConfig = defaultPenConfig;
 
+  private _frontCanvas: Canvas | null = null;
+  private _backCanvas: Canvas | null = null;
+
+  private _pointerPosition: Point = new Point(0, 0);
+  private _isPointerDown: boolean = false;
+  
+  private _usingStyles: boolean = true;
+
+  private _debugMode: boolean = false;
+
+  private _points: Point[] = [];
+  private _strokes: Stroke[] = [];
 
   public constructor() {}
 
-  public setPenMode(mode: boolean) {
-    this.isPenMode = mode;
-  }
-
-  public get penMode() {
-    return this.isPenMode;
-  }
 
   public attach(canvas: HTMLCanvasElement, backCanvas: HTMLCanvasElement) {
-    this.penConfig = this.config.pen;
+    this._penConfig = this._config.pen;
 
-    this.frontCanvas = new Canvas(canvas);
-    this.backCanvas = new Canvas(backCanvas);
+    this._frontCanvas = new Canvas(canvas);
+    this._backCanvas = new Canvas(backCanvas);
 
-    this.frontCanvas.registerEvent("pointerdown", this.pointerDown.bind(this));
-    this.frontCanvas.registerEvent("pointermove", this.pointerMove.bind(this));
-    this.frontCanvas.registerEvent("pointerup", this.pointerUp.bind(this));
-    this.frontCanvas.registerEvent("pointerleave", this.pointerLeave.bind(this));
-    this.frontCanvas.registerEvent("ratechange", (e) => {console.log(e)});
+    void this._registerEvents(this._frontCanvas.canvas);
+  }
 
+  public get penConfig(): PenConfig {
+    return this._penConfig;
+  }
+
+  public setPenConfig(config: PenConfig) { 
+    this._penConfig = config;
+  }
+
+  public setUsingStyles(mode: boolean) {
+    this._usingStyles = mode;
+  }
+
+  public get usingStyles() {
+    return this._usingStyles;
+  }
+
+  public setDebugMode(status: boolean) {
+    this._debugMode = status;
+    void this._redraw();
+  }
+
+  public debugMode() {
+    this._debugMode = !this._debugMode;
+  }
+
+  public setConfig(config: Partial<DrawJsConfig>) {
+    this._config = { ...this._config, ...config };
+  }
+
+  public get config() {
+    return this._config;
+  }
+
+  public export(type: "image" | "json") {
+    if (type === "image") {
+      return this._frontCanvas?.canvas.toDataURL("image/png");
+    } else {
+      return JSON.stringify(this._strokes);
+    }
+  }
+
+  public import(data: string) {
+    const strokes = JSON.parse(data);
+    this._strokes = strokes.map((stroke: Stroke) => {
+      return new Stroke(
+        stroke.points.map((point: Point) => new Point(point.x, point.y)),
+        stroke.config
+      );
+    });
+    void this._redraw();
+  }
+
+  private _redraw() {
+    if (!this._frontCanvas) return;
+    this._frontCanvas.clear();
+
+    this._frontCanvas.drawStroke(this._points, this._penConfig);
+
+    if (this._isPointerDown) {
+      this._points.push(this._pointerPosition);
+    }
+
+    if (this._debugMode) {
+      this._strokes.forEach((stroke) => {
+        this._frontCanvas?.drawPoints(stroke.points, "red");
+      });
+
+      this._frontCanvas?.drawPoints(this._points, "red");
+    }
+    this._points = DrawJsPointFunctions.simplifyPoints(this._points);
+  }
+
+  private _registerEvents(canvas: HTMLCanvasElement) {
+    if (!this._frontCanvas) return;
+    this._frontCanvas.registerEvent("pointerdown", this._pointerDown.bind(this));
+    this._frontCanvas.registerEvent("pointermove", this._pointerMove.bind(this));
+    this._frontCanvas.registerEvent("pointerup", this._pointerUp.bind(this));
+    this._frontCanvas.registerEvent(
+      "pointerleave",
+      this._pointerLeave.bind(this)
+    );
+    this._frontCanvas.registerEvent("ratechange", (e) => {
+      console.log(e);
+    });
 
     document.body.addEventListener(
       "touchstart",
@@ -69,106 +152,52 @@ export default class DrawHtml {
     );
   }
 
-  public get PenConfig(): PenConfig {
-    return this.penConfig;
-  }
-
-  public toggleDebugPoints() {
-    this.debugPoints = !this.debugPoints;
-    void this.redraw();
-  }
-
-  public setConfig(config: Partial<DrawJsConfig>) {
-    this.config = { ...this.config, ...config };
-  }
-
-  public updatePenConfig(config: PenConfig) {
-    this.penConfig = config;
-  }
-
-  public export(type: "image" | "json") {
-    if (type === "image") {
-      return this.frontCanvas?.canvas.toDataURL("image/png");
-    } else {
-      return JSON.stringify(this.strokes);
-    }
-  }
-
-  public import(data: string) {
-    const strokes = JSON.parse(data);
-    this.strokes = strokes.map((stroke: Stroke) => {
-      return new Stroke(
-        stroke.points.map((point: Point) => new Point(point.x, point.y)),
-        stroke.config
-      );
-    });
-    void this.redraw();
-  }
-
-  private redraw() {
-    if (!this.frontCanvas) return;
-    this.frontCanvas.clear();
-    
-    this.frontCanvas.drawStroke(this.points, this.penConfig);
-
-    if (this.isPointerDown) {
-      this.points.push(this.pointerPosition);
-    }
-
-    if (this.debugPoints) {
-      this.strokes.forEach((stroke) => {
-        this.frontCanvas?.drawPoints(stroke.points, "red");
-      });
-
-      this.frontCanvas?.drawPoints(this.points, "red");
-    }
-    this.points = DrawJsPointFunctions.simplifyPoints(this.points);
-  }
-
-  private pointerDown(e: PointerEvent) {
+  private _pointerDown(e: PointerEvent) {
+    if (e.pointerType === "touch" && !this._usingStyles) return;
     e.preventDefault();
-    void this.updatePointerPosition(e);
-    this.isPointerDown = true;
+    void this._updatePointerPosition(e);
+    this._isPointerDown = true;
   }
 
-  private pointerMove(e: PointerEvent) {
+  private _pointerMove(e: PointerEvent) {
     e.preventDefault();
-    void this.updatePointerPosition(e);
+    void this._updatePointerPosition(e);
   }
 
-  private pointerUp(e: PointerEvent) {
-    if(e.pointerType === "touch" && !this.isPenMode) return;
+  private _pointerUp(e: PointerEvent) {
+    if (e.pointerType === "touch" && !this._usingStyles) return;
     e.preventDefault();
-    if (this.isPointerDown) {
-      this.strokes.push(new Stroke(this.points, this.penConfig));
-      this.points = [];
-      
-      this.backCanvas?.clear();
-      this.backCanvas?.drawStrokes(this.strokes);
+    if (this._isPointerDown) {
+      this._strokes.push(new Stroke(this._points, this._penConfig));
+      this._points = [];
+
+      this._backCanvas?.clear();
+      this._backCanvas?.drawStrokes(this._strokes);
     }
 
-    this.isPointerDown = false;
-    void this.updatePointerPosition(e);
+    this._isPointerDown = false;
+    void this._updatePointerPosition(e);
   }
 
-  private pointerLeave(e: PointerEvent) {
-    void this.updatePointerPosition(e);
+  private _pointerLeave(e: PointerEvent) {
+    void this._updatePointerPosition(e);
   }
 
-  private updatePointerPosition(e: PointerEvent) {
+  private _updatePointerPosition(e: PointerEvent) {
     switch (e.pointerType) {
       case "mouse":
-        this.pointerPosition = new Point(e.offsetX, e.offsetY);
+        this._pointerPosition = new Point(e.offsetX, e.offsetY);
         break;
       case "pen":
-        this.pointerPosition = new Point(e.offsetX, e.offsetY);
+        this._pointerPosition = new Point(e.offsetX, e.offsetY);
         break;
       case "touch":
-        if(!this.isPenMode) this.pointerPosition = new Point(e.offsetX, e.offsetY);
+        if (!this._usingStyles)
+          this._pointerPosition = new Point(e.offsetX, e.offsetY);
         break;
       default:
         throw new Error("Unknown pointer type");
     }
-    this.redraw();
+    this._redraw();
   }
 }
