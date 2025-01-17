@@ -19,7 +19,7 @@ export function useDrawjs() {
   return context;
 }
 
-export function Canvas(props: React.CanvasHTMLAttributes<HTMLCanvasElement>) {
+export function Canvas(props: React.HTMLAttributes<HTMLDivElement>) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const backCanvas = useRef<HTMLCanvasElement>(null);
   const draw = useDrawjs();
@@ -31,10 +31,10 @@ export function Canvas(props: React.CanvasHTMLAttributes<HTMLCanvasElement>) {
   }, [canvasRef, draw]);
 
   return (
-    <div>
+    <div {...props}>
       <div style={{ position: "relative" }}>
-      <canvas ref={canvasRef} {...props} style={{position: "absolute", left: "0", top: "0", zIndex: "1", border: "black 1px solid"}} id="front"/>
-      <canvas ref={backCanvas} {...props} style={{position: "absolute", left: "0", top: "0", zIndex: "0", border: "black 1px solid"}} id="back"/>
+      <canvas ref={canvasRef} style={{position: "absolute", left: "0", top: "0", zIndex: "1", border: "black 1px solid"}} id="front"/>
+      <canvas ref={backCanvas} style={{position: "absolute", left: "0", top: "0", zIndex: "0", border: "black 1px solid"}} id="back"/>
     </div>
     </div>
   );
