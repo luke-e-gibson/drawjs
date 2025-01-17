@@ -1,4 +1,4 @@
-import styles from "./style.module.css";
+import styles from "../style/style.module.css";
 import React, { useEffect, useRef, useState } from "react";
 import DrawHtml from "../core/core";
 

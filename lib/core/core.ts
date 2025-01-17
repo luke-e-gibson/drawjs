@@ -9,7 +9,7 @@ import {
 import { simplifyPoints } from "./pointFunctions";
 import Canvas from "./canvas";
 
-export default class DrawHtml {
+export default class FinelinerCore {
   private _config: DrawJsConfig = defaultConfig;
   private _penConfig: PenConfig = defaultPenConfig;
 
