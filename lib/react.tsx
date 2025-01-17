@@ -32,9 +32,9 @@ export function Canvas(props: React.HTMLAttributes<HTMLDivElement>) {
 
   return (
     <div {...props}>
-      <div style={{ position: "relative" }}>
-      <canvas ref={canvasRef} style={{position: "absolute", left: "0", top: "0", zIndex: "1", border: "black 1px solid"}} id="front"/>
-      <canvas ref={backCanvas} style={{position: "absolute", left: "0", top: "0", zIndex: "0", border: "black 1px solid"}} id="back"/>
+      <div style={{ position: "relative", width: "fit", height: "fit"}}>
+      <canvas  ref={canvasRef} style={{position: "absolute", left: "0", top: "0", zIndex: "1", border: "black 1px solid", width: "fit", height: "fit"}} id="front"/>
+      <canvas ref={backCanvas} style={{position: "absolute", left: "0", top: "0", zIndex: "0", border: "black 1px solid", width: "fit", height: "fit"}} id="back"/>
     </div>
     </div>
   );
