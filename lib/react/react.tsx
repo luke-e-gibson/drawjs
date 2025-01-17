@@ -86,7 +86,8 @@ export function CanvasDebugButton(
   return (
     <button
       onClick={() => {
-        draw.toggleDebugPoints();
+        console.log(draw.debugMode);
+        draw.setDebugMode(!draw.debugMode);
       }}
       {...props}
     >

@@ -20,7 +20,6 @@ export default class Canvas {
     this.ctx.lineWidth = penConfig.width;
     this.ctx.lineCap = "round";
     this.ctx.beginPath();
-    console.log(this.ctx.canvas.id)
     points.forEach((point, index) => {
       if (index === 0) {
         this.ctx.moveTo(point.x, point.y);

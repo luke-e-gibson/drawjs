@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import {
   Canvas,
   CanvasDebugButton,
@@ -20,6 +19,7 @@ function App() {
           <PenColorChanger />
           <PenWidthChanger />
           <CanvasDebugButton />
+          
         </div>
         <Canvas
           style={{ border: "black 1px solid", width: "50%", height: "800px" }}

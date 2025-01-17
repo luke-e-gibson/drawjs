@@ -58,8 +58,8 @@ export default class DrawHtml {
     void this._redraw();
   }
 
-  public debugMode() {
-    this._debugMode = !this._debugMode;
+  public get debugMode() {
+    return this._debugMode;
   }
 
   public setConfig(config: Partial<DrawJsConfig>) {
