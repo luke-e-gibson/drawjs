@@ -31,9 +31,6 @@ export default class DrawHtml {
   private isPenMode: boolean = true;
 
 
-  private backCanvas: HTMLCanvasElement | null = null;
-  private backCtx: CanvasRenderingContext2D | null = null;
-
   public constructor() {}
 
   public setPenMode(mode: boolean) {
@@ -45,7 +42,7 @@ export default class DrawHtml {
     return this.isPenMode;
   }
 
-  public attach(canvas: HTMLCanvasElement, backCanvas: HTMLCanvasElement) {
+  public attach(canvas: HTMLCanvasElement) {
     this.penConfig = this.config.pen;
 
     this.canvas = canvas;
@@ -55,16 +52,6 @@ export default class DrawHtml {
 
     this.ctx = this.canvas.getContext("2d") as CanvasRenderingContext2D;
     if (!this.ctx) {
-      throw new Error("Canvas not found");
-    }
-
-    this.backCanvas = backCanvas;
-    if (!this.backCanvas) {
-      throw new Error("Canvas not found");
-    }
-
-    this.backCtx = this.backCanvas.getContext("2d") as CanvasRenderingContext2D;
-    if (!this.backCtx) {
       throw new Error("Canvas not found");
     }
 
@@ -142,33 +129,33 @@ export default class DrawHtml {
     void this.redraw();
   }
 
-  private pointsDrawStroke(points: Point[], penConfig: PenConfig, ctx: CanvasRenderingContext2D) {
-    if (!ctx) return;
+  private pointsDrawStroke(points: Point[], penConfig: PenConfig) {
+    if (!this.ctx) return;
 
-    ctx.strokeStyle = penConfig.color;
-    ctx.lineWidth = penConfig.width;
-    ctx.lineCap = "round";
-    ctx.beginPath();
-    console.log(ctx.canvas.id)
+    this.ctx.strokeStyle = penConfig.color;
+    this.ctx.lineWidth = penConfig.width;
+
+    this.ctx.beginPath();
+
     points.forEach((point, index) => {
       if (index === 0) {
-        if (!ctx) return;
-        ctx.moveTo(point.x, point.y);
+        if (!this.ctx) return;
+        this.ctx.moveTo(point.x, point.y);
       } else {
-        if (!ctx) return;
+        if (!this.ctx) return;
         //this.ctx.moveTo(point.x, point.y);
 
         if(index === points.length - 1) {
-          ctx.lineTo(point.x, point.y);
+          this.ctx.lineTo(point.x, point.y);
         } else {
           const xc = (point.x + points[index + 1].x) / 2;
           const yc = (point.y + points[index + 1].y) / 2;
         
-          ctx.quadraticCurveTo(point.x, point.y, xc, yc);
+          this.ctx.quadraticCurveTo(point.x, point.y, xc, yc);
         }
       }
     });
-    ctx.stroke();
+    this.ctx.stroke();
   }
 
   private pointsDrawSquare(points: Point[]) {
@@ -183,11 +170,14 @@ export default class DrawHtml {
 
   private redraw() {
     if (!this.ctx) return;
-    if (!this.backCtx) return;
     if (!this.canvas) return;
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.pointsDrawStroke(this.points, this.penConfig, this.ctx);
+    this.strokes.forEach((stroke) => {
+      this.pointsDrawStroke(stroke.points, stroke.config);
+    });
+
+    this.pointsDrawStroke(this.points, this.penConfig);
 
     if (this.isPointerDown) {
       this.points.push(this.pointerPosition);
@@ -223,14 +213,14 @@ export default class DrawHtml {
   private pointerUp(e: PointerEvent) {
     e.preventDefault();
     if (this.isPointerDown) {
+      let points = this.points;
+
+      this.config.pointsPipeline.forEach((pipeline) => {
+        points = pipeline(points);
+      });
+
       this.strokes.push(new Stroke(this.points, this.penConfig));
       this.points = [];
-    
-      this.backCtx?.clearRect(0, 0, this.backCanvas?.width as number, this.backCanvas?.height as number);
-      this.strokes.forEach((stroke) => {
-        if (!this.backCtx) return console.error("No back context");
-        this.pointsDrawStroke(DrawJsPointFunctions.simplifyPoints(stroke.points), stroke.config, this.backCtx);
-      });
     }
 
     this.isPointerDown = false;
