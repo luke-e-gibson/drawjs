@@ -1,6 +1,6 @@
 import styles from "./index.module.css";
 import React, { useEffect, useRef, useState } from "react";
-import DrawHtml from "./lib";
+import DrawHtml from "../core/lib";
 
 const DrawContext = React.createContext<DrawHtml | null>(null);
 

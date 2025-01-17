@@ -4,7 +4,7 @@ import {
   CanvasDebugButton,
   PenColorChanger,
   PenWidthChanger,
-} from "../lib/react";
+} from "../lib/react/react";
 
 function App() {
 
