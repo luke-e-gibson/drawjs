@@ -72,7 +72,7 @@ export default class FinelinerCore {
 
   public export(type: "image" | "json") {
     if (type === "image") {
-      return this._frontCanvas?.canvas.toDataURL("image/png");
+      return this._backCanvas?.canvas.toDataURL("image/png");
     } else {
       return JSON.stringify(this._strokes);
     }
