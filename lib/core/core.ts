@@ -26,6 +26,8 @@ export default class FinelinerCore {
   private _points: Point[] = [];
   private _strokes: Stroke[] = [];
 
+  private _deltaCallback: (stroke: Stroke) => void = () => {};
+
   public constructor() {}
 
   public attach(canvas: HTMLCanvasElement, backCanvas: HTMLCanvasElement) {
@@ -35,6 +37,10 @@ export default class FinelinerCore {
     this._backCanvas = new Canvas(backCanvas);
 
     void this._registerEvents(this._frontCanvas.canvas);
+  }
+
+  public setDeltaCallback(deltaCallback: (stroke: Stroke) => void) {
+    this._deltaCallback = deltaCallback;
   }
 
   public get penConfig(): PenConfig {
@@ -173,8 +179,10 @@ export default class FinelinerCore {
     if (e.pointerType === "touch" && !this._usingStyles) return;
     e.preventDefault();
     if (this._isPointerDown) {
-      this._strokes.push(new Stroke(this._points, this._penConfig));
+      const stroke = new Stroke(this._points, this._penConfig)
+      this._strokes.push(stroke);
       this._points = [];
+      this._deltaCallback(stroke);
 
       this._backCanvas?.clear();
       this._backCanvas?.drawStrokes(this._strokes);
